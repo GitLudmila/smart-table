@@ -1,4 +1,4 @@
-import {cloneTemplate} from "../lib/utils.js";
+import { cloneTemplate } from "../lib/utils.js";
 
 /**
  * Инициализирует таблицу и вызывает коллбэк при любых изменениях и нажатиях на кнопки
@@ -8,18 +8,63 @@ import {cloneTemplate} from "../lib/utils.js";
  * @returns {{container: Node, elements: *, render: render}}
  */
 export function initTable(settings, onAction) {
-    const {tableTemplate, rowTemplate, before, after} = settings;
+    const { tableTemplate, rowTemplate, before, after } = settings;
     const root = cloneTemplate(tableTemplate);
 
     // @todo: #1.2 —  вывести дополнительные шаблоны до и после таблицы
+    // Обработка шаблонов "до"
+    if (before && Array.isArray(before)) {
+        before = before.reverse();
+        before.forEach(subName => {
+            root[subName] = this.cloneTemplate(subName); // клонируем и сохраняем в таблице
+            this.container.prepend(root[subName].container); // добавляем к контейнеру таблицы спереди
+        });
+    }
 
+    // Обработка шаблонов "после"
+    if (after && Array.isArray(after)) {
+        after.forEach(subName => {
+            root[subName] = this.cloneTemplate(subName); // клонируем и сохраняем в таблице
+            this.container.append(root[subName].container); // добавляем к контейнеру таблицы сзади
+        });
+    }
     // @todo: #1.3 —  обработать события и вызвать onAction()
+    // Обработчик события change
+    root.container.addEventListener('change', () => {
+        onAction(); // вызываем onAction без аргументов
+    });
+
+    // Обработчик события reset
+    root.container.addEventListener('reset', () => {
+        setTimeout(onAction, 0); // Отложенный вызов onAction с задержкой
+    });
+
+    // Обработчик события submit
+    root.container.addEventListener('submit', (e) => {
+        e.preventDefault(); // Предотвращаем стандартное поведение формы
+        onAction(e.submitter); // вызываем onAction с передачей e.submitter
+    });
 
     const render = (data) => {
         // @todo: #1.1 — преобразовать данные в массив строк на основе шаблона rowTemplate
-        const nextRows = [];
+        const nextRows = data.map(item => {
+            // Клонируем шаблон строки для каждого элемента данных
+            const row = cloneTemplate(rowTemplate);
+
+            // Перебираем ключи в объекте данных (item)
+            Object.keys(item).forEach(key => {
+                // Проверяем, существует ли элемент с таким ключом в клонированном шаблоне
+                if (row.elements.hasOwnProperty(key)) {
+                    // Если существует, присваиваем его textContent соответствующее значение из данных
+                    row.elements[key].textContent = item[key];
+                }
+            });
+
+            // Возвращаем контейнер строки (предполагается, что это DOM-элемент)
+            return row.container;
+        });
         root.elements.rows.replaceChildren(...nextRows);
     }
 
-    return {...root, render};
+    return { ...root, render };
 }
