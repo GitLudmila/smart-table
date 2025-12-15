@@ -12,22 +12,18 @@ export function initTable(settings, onAction) {
     const root = cloneTemplate(tableTemplate);
 
     // @todo: #1.2 —  вывести дополнительные шаблоны до и после таблицы
-    // Обработка шаблонов "до"
-    if (before && Array.isArray(before)) {
-        before = before.reverse();
-        before.forEach(subName => {
-            root[subName] = this.cloneTemplate(subName); // клонируем и сохраняем в таблице
-            this.container.prepend(root[subName].container); // добавляем к контейнеру таблицы спереди
-        });
-    }
+    // Вставляем дополнительные шаблоны до таблицы
+    before.reverse().forEach(subName => {
+        root[subName] = cloneTemplate(subName);
+        root.container.prepend(root[subName].container);
+    });
 
-    // Обработка шаблонов "после"
-    if (after && Array.isArray(after)) {
-        after.forEach(subName => {
-            root[subName] = this.cloneTemplate(subName); // клонируем и сохраняем в таблице
-            this.container.append(root[subName].container); // добавляем к контейнеру таблицы сзади
-        });
-    }
+    // И после таблицы
+    after.forEach(subName => {
+        root[subName] = cloneTemplate(subName);
+        root.container.append(root[subName].container);
+    });
+
     // @todo: #1.3 —  обработать события и вызвать onAction()
     // Обработчик события change
     root.container.addEventListener('change', () => {
@@ -36,8 +32,8 @@ export function initTable(settings, onAction) {
 
     // Обработчик события reset
     root.container.addEventListener('reset', () => {
-        setTimeout(onAction, 0); // Отложенный вызов onAction с задержкой
-    });
+        setTimeout(() => { onAction() }, 0)
+    }); // Отложенный вызов onAction с задержкой
 
     // Обработчик события submit
     root.container.addEventListener('submit', (e) => {

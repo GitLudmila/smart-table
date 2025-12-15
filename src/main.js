@@ -1,7 +1,7 @@
 import './fonts/ys-display/fonts.css'
 import './style.css'
 
-import { data as sourceData } from "./data/dataset_1.js";
+// import { data as sourceData } from "./data/dataset_1.js";
 
 import { initData } from "./data.js";
 import { processFormData } from "./lib/utils.js";
@@ -15,7 +15,7 @@ import { initSearching } from "./components/searching.js"
 
 
 // Исходные данные используемые в render()
-const api = initData(sourceData);
+const api = initData();
 
 /**
  * Сбор и обработка полей из таблицы
@@ -61,17 +61,28 @@ const sampleTable = initTable({
 }, render);
 
 // @todo: инициализация
-const { applyPagination, updatePagination } = initPagination(sampleTable.pagination.elements, render);
-const { applyFiltering, updateIndexes } = initFiltering(sampleTable.filter.elements, render);
+const { applyPagination, updatePagination } = initPagination(
+    sampleTable.pagination.elements,
+    (el, page, isCurrent) => {
+        const input = el.querySelector('input');
+        const label = el.querySelector('span');
+        input.value = page;
+        input.checked = isCurrent;
+        label.textContent = page;
+        return el;
+    });
+
+const { applyFiltering, updateIndexes } = initFiltering(
+    sampleTable.filter.elements, {
+    searchBySeller: indexes.sellers
+});
 
 const applySorting = initSorting([        // Нам нужно передать сюда массив элементов, которые вызывают сортировку, чтобы изменять их визуальное представление
     sampleTable.header.elements.sortByDate,
     sampleTable.header.elements.sortByTotal
 ]);
 
-const applySearching = initSearching(sampleTable.search.elements, {    // передаём элементы поиска
-    name: []
-});
+const applySearching = initSearching('search');
 
 const appRoot = document.querySelector('#app');
 appRoot.appendChild(sampleTable.container);
