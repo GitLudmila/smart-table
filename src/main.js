@@ -61,17 +61,16 @@ const sampleTable = initTable({
 }, render);
 
 // @todo: инициализация
-const { applyPagination, updatePagination } = initPagination(...);
-const { applyFiltering, updateIndexes } = initFiltering(...);
+const { applyPagination, updatePagination } = initPagination(sampleTable.pagination.elements, render);
+const { applyFiltering, updateIndexes } = initFiltering(sampleTable.filter.elements, render);
 
 const applySorting = initSorting([        // Нам нужно передать сюда массив элементов, которые вызывают сортировку, чтобы изменять их визуальное представление
     sampleTable.header.elements.sortByDate,
     sampleTable.header.elements.sortByTotal
 ]);
 
-// search
 const applySearching = initSearching(sampleTable.search.elements, {    // передаём элементы поиска
-    name: indexes.names
+    name: []
 });
 
 const appRoot = document.querySelector('#app');
