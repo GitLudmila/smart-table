@@ -72,10 +72,11 @@ const { applyPagination, updatePagination } = initPagination(
         return el;
     });
 
-const { applyFiltering, updateIndexes } = initFiltering(
-    sampleTable.filter.elements, {
-    searchBySeller: indexes.sellers
-});
+let applyFiltering, updateIndexes;
+// const { applyFiltering, updateIndexes } = initFiltering(
+//     sampleTable.filter.elements, {
+//     searchBySeller: indexes.sellers
+// });
 
 const applySorting = initSorting([        // Нам нужно передать сюда массив элементов, которые вызывают сортировку, чтобы изменять их визуальное представление
     sampleTable.header.elements.sortByDate,
@@ -89,6 +90,13 @@ appRoot.appendChild(sampleTable.container);
 
 async function init() {
     const indexes = await api.getIndexes();
+
+    ({ applyFiltering, updateIndexes } = initFiltering(
+        sampleTable.filter.elements,
+        {
+            searchBySeller: indexes.sellers
+        }
+    ));
 
     updateIndexes(sampleTable.filter.elements, {
         searchBySeller: indexes.sellers
